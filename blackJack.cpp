@@ -1,7 +1,7 @@
 #include <iostream>
 #include <array>
-#include <ctime> // для time()
-#include <cstdlib> // для rand() і srand()
+#include <ctime> // for time()
+#include <cstdlib> // for rand() and srand()
 
 class Card
 {
@@ -37,7 +37,7 @@ private:
     CardSuit m_suit;
 
 public:
-    Card(CardRank rank = MAX_RANKS, CardSuit suit = MAX_SUITS) // !!! default
+    Card(CardRank rank = MAX_RANKS, CardSuit suit = MAX_SUITS)
         : m_rank(rank), m_suit(suit)
     {
 
@@ -97,13 +97,12 @@ class Deck
 {
 private:
     std::array<Card, 52> m_deck;
+	int *m_cardIndex = 0;
 
-    // Генеруємо випадкове число між min і max (включно).
-    // Припускається, що srand() вже викликали
+	// generate random number in range
     int getRandomNumber(int min, int max)
     {
 	    static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
- 	    // Рівномірно розподіляємо рандомне число в нашому діапазоні
 	    return static_cast<int>(rand() * fraction * (max - min + 1) + min);
     }
 
@@ -117,7 +116,7 @@ private:
 public:
     Deck()
     {
-        // Звичайно, можна було б ініціалізувати кожну карту окремо, але навіщо? Адже є цикли!
+		// constructor for intialize deck
 	    int card = 0;
 	    for (int suit = 0; suit < Card::MAX_SUITS; ++suit){
 	        for (int rank = 0; rank < Card::MAX_RANKS; ++rank)
@@ -139,15 +138,20 @@ public:
 
     void shuffleDeck()
     {
-	    // Перебираємо кожну карту в колоді
+	    // iterate all deck card
 	    for (int index = 0; index < 52; ++index)
 	    {
-		    // Вибираємо будь-яку випадкову карту
+		    // choose random card
 		    int swapIndex = getRandomNumber(0, 51);
-		    // Міняємо місцями з нашою поточною картою
+			// swap current and random card
 		    swapCard(m_deck[index], m_deck[swapIndex]);
 	    }
     }
+
+	const Card *dealCard()
+	{
+		return &deck[*m_index++];
+	}
 };
  
 // char getPlayerChoice()
@@ -208,20 +212,10 @@ public:
  
 int main()
 {
-	srand(static_cast<unsigned int>(time(0))); // використовуємо системний годинник в якості стартового значення
-	rand(); // користувачам Visual Studio: скидаємо перше згенероване (випадкове) число
+	srand(static_cast<unsigned int>(time(0))); // use system clock to set start number
+	rand(); // reset the start number
  
 	// std::array<Card, 52> deck;
-	
-	// // Звичайно, можна було б ініціалізувати кожну карту окремо, але навіщо? Адже є цикли!
-	// int card = 0;
-	// for (int suit = 0; suit < MAX_SUITS; ++suit)
-	// for (int rank = 0; rank < MAX_RANKS; ++rank)
-	// {
-	// 	deck[card].suit = static_cast<CardSuit>(suit);
-	// 	deck[card].rank = static_cast<CardRank>(rank);
-	// 	++card;
-	// }
 	
 	// shuffleDeck(deck);
  
@@ -229,8 +223,6 @@ int main()
 	// 	std::cout << "You win!\n";
 	// else
 	// 	std::cout << "You lose!\n";
- 
-	// return 0;
 
     Deck deck;
     deck.printDeck();

@@ -97,7 +97,7 @@ class Deck
 {
 private:
     std::array<Card, 52> m_deck;
-	int *m_cardIndex = 0;
+	int m_cardIndex = 0;
 
 	// generate random number in range
     int getRandomNumber(int min, int max)
@@ -146,86 +146,80 @@ public:
 			// swap current and random card
 		    swapCard(m_deck[index], m_deck[swapIndex]);
 	    }
+		m_cardIndex = 0;
     }
 
-	const Card *dealCard()
+	// next card
+	const Card &dealCard()
 	{
-		return &deck[*m_index++];
+		return m_deck[m_cardIndex++];
 	}
 };
  
-// char getPlayerChoice()
-// {
-// 	std::cout << "(h) to hit, or (s) to stand: ";
-// 	char choice;
-// 	do
-// 	{
-// 		std::cin >> choice;
-// 	} while (choice != 'h' && choice != 's');
+char getPlayerChoice()
+{
+	std::cout << "(h) to hit, or (s) to stand: ";
+	char choice;
+	do
+	{
+		std::cin >> choice;
+	} while (choice != 'h' && choice != 's');
 	
-// 	return choice;
-// }
+	return choice;
+}
  
-// bool playBlackjack(const std::array<Card, 52> deck)
-// {
-// 	const Card *cardPtr = &deck[0];
+bool playBlackjack(Deck &deck)
+{
+	int playerTotal = 0;
+	int dealerTotal = 0;
  
-// 	int playerTotal = 0;
-// 	int dealerTotal = 0;
+	// dealer get card
+	dealerTotal += deck.dealCard().getCardValue();
+	std::cout << "The dealer is showing: " << dealerTotal << '\n';
  
-// 	// Дилер отримує одну карту
-// 	dealerTotal += getCardValue(*cardPtr++);
-// 	std::cout << "The dealer is showing: " << dealerTotal << '\n';
+	// player get 2 cards
+	playerTotal += deck.dealCard().getCardValue();
+	playerTotal += deck.dealCard().getCardValue();
  
-// 	// Гравець отримує дві карти
-// 	playerTotal += getCardValue(*cardPtr++);
-// 	playerTotal += getCardValue(*cardPtr++);
+	// player starts
+	while (1)
+	{
+		std::cout << "You have: " << playerTotal << '\n';
+		char choice = getPlayerChoice();
+		if (choice == 's')
+			break;
  
-// 	// Гравець починає
-// 	while (1)
-// 	{
-// 		std::cout << "You have: " << playerTotal << '\n';
-// 		char choice = getPlayerChoice();
-// 		if (choice == 's')
-// 			break;
- 
-// 		playerTotal += getCardValue(*cardPtr++);
+		playerTotal += deck.dealCard().getCardValue();
 		
-// 		// Дивимося, чи гравець не програв
-// 		if (playerTotal > 21)
-// 			return false;
-// 	}
+		// check if player lose
+		if (playerTotal > 21)
+			return false; // false = lose
+	}
  
-// 	// Якщо гравець не програв (у нього не більше 21 очка), тоді дилер отримує карти до тих пір, поки у нього в підсумку буде не менше 17 очків
-// 	while (dealerTotal < 17)
-// 	{
-// 		dealerTotal += getCardValue(*cardPtr++);
-// 		std::cout << "The dealer now has: " << dealerTotal << '\n';
-// 	}
+	// if player not lose (<21), then dealer get card until the sum is <17
+	while (dealerTotal < 17)
+	{
+		dealerTotal += deck.dealCard().getCardValue();
+		std::cout << "The dealer now has: " << dealerTotal << '\n';
+	}
  
-// 	// Якщо у дилера більше 21 очка, то він програв, а гравець виграв
-// 	if (dealerTotal > 21)
-// 		return true;
+	// if dealer got > 21 - dealer lose
+	if (dealerTotal > 21)
+		return true; // true = win
  
-// 	return (playerTotal > dealerTotal);
-// }
+	return (playerTotal > dealerTotal);
+}
  
 int main()
 {
 	srand(static_cast<unsigned int>(time(0))); // use system clock to set start number
 	rand(); // reset the start number
  
-	// std::array<Card, 52> deck;
-	
-	// shuffleDeck(deck);
- 
-	// if (playBlackjack(deck))
-	// 	std::cout << "You win!\n";
-	// else
-	// 	std::cout << "You lose!\n";
-
     Deck deck;
-    deck.printDeck();
     deck.shuffleDeck();
-    deck.printDeck();
+
+	if (playBlackjack(deck))
+		std::cout << "You win!\n";
+	else
+		std::cout << "You lose!\n";
 }
